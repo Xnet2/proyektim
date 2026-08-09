@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<title>אתר הפרויקטים</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+  :root{
+    --bg:#F7F6F2;
+    --surface:#FFFFFF;
+    --ink:#1C1D1B;
+    --ink-soft:#5C5B54;
+    --ink-faint:#98968C;
+    --line:#E4E2D9;
+    --accent:#3A5A7A;
+    --accent-ink:#EAF0F5;
+    --open:#2F6F4E;
+    --open-bg:#E7F3EB;
+    --progress:#A2600F;
+    --progress-bg:#FBEDD9;
+    --done:#6B6862;
+    --done-bg:#EEEDE7;
+    --radius:14px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,"Helvetica Neue",sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);}
+  body{padding:0 0 4rem;}
+  .wrap{max-width:920px;margin:0 auto;padding:0 20px;}
+
+  header.top{border-bottom:1px solid var(--line);background:var(--surface);}
+  .top-inner{max-width:920px;margin:0 auto;padding:28px 20px 22px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;}
+  .brand-mark{width:34px;height:34px;border-radius:9px;background:var(--accent);flex:none;position:relative;}
+  .brand-mark::after{content:"";position:absolute;inset:9px;border:2px solid var(--accent-ink);border-radius:4px;}
+  h1{font-size:22px;font-weight:600;margin:0 0 2px;letter-spacing:-.01em;}
+  .tagline{font-size:13.5px;color:var(--ink-soft);margin:0;}
+  .whoami{font-size:13px;color:var(--ink-faint);text-align:left;display:flex;align-items:center;gap:10px;}
+  .whoami b{color:var(--ink-soft);font-weight:600;}
+  .signout{border:none;background:none;color:var(--ink-faint);font-size:12.5px;cursor:pointer;text-decoration:underline;padding:0;}
+
+  .toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:26px 0 18px;flex-wrap:wrap;}
+  .filters{display:flex;gap:6px;flex-wrap:wrap;}
+  .chip{border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);font-size:13px;padding:6px 13px;border-radius:99px;cursor:pointer;transition:.15s;}
+  .chip:hover{border-color:var(--ink-faint);}
+  .chip.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+  .btn-new{background:var(--accent);color:#fff;border:none;font-size:14px;font-weight:600;padding:10px 18px;border-radius:10px;cursor:pointer;}
+  .btn-new:hover{opacity:.92;}
+
+  #board{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 17px;cursor:pointer;transition:.15s;display:flex;flex-direction:column;gap:10px;}
+  .card:hover{border-color:var(--ink-faint);transform:translateY(-1px);}
+  .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+  .card-title{font-size:15.5px;font-weight:600;line-height:1.35;}
+  .badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px;white-space:nowrap;flex:none;}
+  .badge.open{color:var(--open);background:var(--open-bg);}
+  .badge.in_progress{color:var(--progress);background:var(--progress-bg);}
+  .badge.done{color:var(--done);background:var(--done-bg);}
+  .card-desc{font-size:13.5px;color:var(--ink-soft);line-height:1.5;flex:1;
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+  .card-meta{font-size:12px;color:var(--ink-faint);display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:10px;}
+  .cat{text-transform:uppercase;letter-spacing:.04em;font-size:10.5px;color:var(--ink-faint);}
+
+  .empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--ink-faint);font-size:14px;}
+
+  .overlay{position:fixed;inset:0;background:rgba(28,29,27,.4);display:none;align-items:flex-start;justify-content:center;padding:6vh 16px;overflow:auto;z-index:50;}
+  .overlay.show{display:flex;}
+  .modal{background:var(--surface);border-radius:16px;max-width:520px;width:100%;padding:26px 26px 22px;}
+  .modal h2{font-size:18px;margin:0 0 16px;font-weight:600;}
+  label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);margin:14px 0 6px;}
+  input[type=text],textarea,select{width:100%;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;background:#FCFCFA;color:var(--ink);}
+  textarea{resize:vertical;min-height:80px;}
+  input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent);}
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;}
+  .btn-ghost{background:none;border:1px solid var(--line);color:var(--ink-soft);padding:9px 16px;border-radius:9px;font-size:13.5px;cursor:pointer;}
+  .btn-primary{background:var(--ink);color:#fff;border:none;padding:9px 18px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;}
+  .btn-primary:disabled{opacity:.5;cursor:default;}
+  .err{color:#B33A3A;font-size:13px;margin-top:10px;display:none;}
+
+  .detail-back{background:none;border:none;color:var(--ink-faint);font-size:13px;cursor:pointer;padding:0;margin-bottom:14px;}
+  .detail{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px 26px;}
+  .detail-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;}
+  .detail h2{font-size:19px;margin:0 0 4px;font-weight:600;}
+  .detail-sub{font-size:12.5px;color:var(--ink-faint);}
+  .detail-desc{margin:16px 0;font-size:14.5px;line-height:1.65;color:var(--ink);white-space:pre-wrap;}
+  .detail-actions{display:flex;gap:8px;margin:18px 0 4px;}
+
+  .updates{margin-top:22px;border-top:1px solid var(--line);padding-top:18px;}
+  .updates h3{font-size:13.5px;font-weight:600;color:var(--ink-soft);margin:0 0 12px;}
+  .update-item{padding:10px 0;border-bottom:1px solid var(--line);}
+  .update-item:last-child{border-bottom:none;}
+  .update-item .u-text{font-size:14px;line-height:1.55;}
+  .update-item .u-meta{font-size:11.5px;color:var(--ink-faint);margin-top:3px;}
+  .no-updates{font-size:13px;color:var(--ink-faint);}
+
+  .update-form{margin-top:16px;display:flex;flex-direction:column;gap:8px;}
+  .update-form .row{display:flex;gap:8px;align-items:center;}
+
+  .loading{text-align:center;padding:60px 0;color:var(--ink-faint);font-size:14px;}
+  .hidden{display:none !important;}
+
+  .login-screen{max-width:400px;margin:14vh auto 0;text-align:center;}
+  .login-screen .brand-mark{margin:0 auto 18px;}
+  .login-screen h2{font-size:19px;margin:0 0 6px;font-weight:600;}
+  .login-screen p{color:var(--ink-soft);font-size:14px;margin:0 0 24px;}
+  .login-btn-wrap{display:flex;justify-content:center;}
+
+  @media (max-width:600px){
+    .top-inner{flex-direction:column;align-items:flex-start;}
+    .whoami{text-align:right;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div style="display:flex;gap:12px;align-items:center;">
+      <div class="brand-mark"></div>
+      <div>
+        <h1>אתר הפרויקטים</h1>
+        <p class="tagline">מציעים רעיון, לוקחים על עצמכם פרויקט, מדווחים על התקדמות</p>
+      </div>
+    </div>
+    <div class="whoami hidden" id="whoami"></div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div id="loginView" class="hidden login-screen">
+    <div class="brand-mark"></div>
+    <h2>ברוכים הבאים</h2>
+    <p>יש להתחבר עם חשבון Google כדי להמשיך</p>
+    <div class="login-btn-wrap">
+      <div id="g_id_onload"
+           data-client_id="<?= clientId ?>"
+           data-callback="handleCredentialResponse"
+           data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin"
+           data-type="standard"
+           data-theme="outline"
+           data-size="large"
+           data-locale="he"
+           data-text="signin_with">
+      </div>
+    </div>
+    <div class="err" id="loginErr"></div>
+  </div>
+
+  <div id="loadingState" class="loading">טוען...</div>
+
+  <div id="boardView" class="hidden">
+    <div class="toolbar">
+      <div class="filters" id="statusFilters"></div>
+      <button class="btn-new" id="openCreate">+ הצעת פרויקט</button>
+    </div>
+    <div id="board"></div>
+  </div>
+
+  <div id="detailView" class="hidden">
+    <button class="detail-back" id="backBtn">→ חזרה לרשימה</button>
+    <div class="detail" id="detailBody"></div>
+  </div>
+</div>
+
+<div class="overlay" id="createOverlay">
+  <div class="modal">
+    <h2>הצעת פרויקט חדש</h2>
+    <label for="f-title">שם הפרויקט</label>
+    <input type="text" id="f-title" placeholder="למשל: תוסף כרום לחיפוש מהיר בטאבים">
+    <label for="f-cat">סוג</label>
+    <select id="f-cat">
+      <option value="site">אתר</option>
+      <option value="extension">תוסף לדפדפן</option>
+      <option value="app">אפליקציה</option>
+      <option value="desktop">תוכנה למחשב</option>
+      <option value="other">אחר</option>
+    </select>
+    <label for="f-desc">תיאור מפורט</label>
+    <textarea id="f-desc" placeholder="מה בדיוק המוצר אמור לעשות, למי הוא מיועד, ומה חשוב שיהיה בו"></textarea>
+    <div class="err" id="createErr"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="cancelCreate">ביטול</button>
+      <button class="btn-primary" id="submitCreate">פרסום פרויקט</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const GOOGLE_CLIENT_ID = '<?= clientId ?>';
+
+  let CURRENT_USER = null;
+  let SESSION_TOKEN = null;
+  let PROJECTS = [];
+  let ACTIVE_FILTER = 'all';
+  let CURRENT_DETAIL_ID = null;
+
+  const STATUS_LABEL = { open: 'פתוח', in_progress: 'בתהליך', done: 'הושלם' };
+  const CATEGORY_LABEL = { site: 'אתר', extension: 'תוסף דפדפן', app: 'אפליקציה', desktop: 'תוכנה למחשב', other: 'אחר' };
+  const FILTERS = [
+    { key: 'all', label: 'הכל' },
+    { key: 'open', label: 'פתוחים' },
+    { key: 'in_progress', label: 'בתהליך' },
+    { key: 'done', label: 'הושלמו' }
+  ];
+
+  function esc(s){
+    const d = document.createElement('div');
+    d.textContent = (s === undefined || s === null) ? '' : String(s);
+    return d.innerHTML;
+  }
+
+  function fmtDate(iso){
+    if(!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString('he-IL', { day:'numeric', month:'short', year:'numeric' });
+  }
+
+  // ============ AUTH ============
+
+  function showLoginScreen(message){
+    SESSION_TOKEN = null;
+    CURRENT_USER = null;
+    document.getElementById('loadingState').classList.add('hidden');
+    document.getElementById('boardView').classList.add('hidden');
+    document.getElementById('detailView').classList.add('hidden');
+    document.getElementById('whoami').classList.add('hidden');
+    document.getElementById('loginView').classList.remove('hidden');
+    const errBox = document.getElementById('loginErr');
+    if(message){
+      errBox.textContent = message;
+      errBox.style.display = 'block';
+    } else {
+      errBox.style.display = 'none';
+    }
+  }
+
+  // Decodes the payload segment of a JWT (base64url) without any network
+  // call. This does NOT verify the token's signature — it only reads the
+  // claims Google's Sign-In popup already attached to it client-side.
+  function decodeJwtPayload(token){
+    const part = token.split('.')[1];
+    const base64 = part.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64 + '==='.slice((base64.length + 3) % 4);
+    const raw = atob(padded);
+    const jsonStr = decodeURIComponent(
+      raw.split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')
+    );
+    return JSON.parse(jsonStr);
+  }
+
+  function handleCredentialResponse(response){
+    let payload;
+    try {
+      payload = decodeJwtPayload(response.credential);
+    } catch(e){
+      showLoginScreen('שגיאה בפענוח פרטי ההתחברות.');
+      return;
+    }
+
+    if(payload.aud !== GOOGLE_CLIENT_ID){
+      showLoginScreen('הטוקן לא שייך לאפליקציה הזו.');
+      return;
+    }
+    if(payload.email_verified !== true && payload.email_verified !== 'true'){
+      showLoginScreen('כתובת האימייל אינה מאומתת על ידי גוגל.');
+      return;
+    }
+
+    const email = payload.email;
+    const name = payload.name || (email ? email.split('@')[0] : '');
+
+    document.getElementById('loginView').classList.add('hidden');
+    document.getElementById('loadingState').classList.remove('hidden');
+    document.getElementById('loadingState').textContent = 'מתחברים...';
+    google.script.run
+      .withSuccessHandler(onLoginSuccess)
+      .withFailureHandler(err => showLoginScreen(err && err.message ? err.message : String(err)))
+      .login(email, name);
+  }
+
+  function onLoginSuccess(data){
+    SESSION_TOKEN = data.sessionToken;
+    CURRENT_USER = data.user;
+    document.getElementById('loadingState').textContent = 'טוען פרויקטים...';
+    loadBoard();
+  }
+
+  function isAuthExpired(err){
+    return err && err.message === 'AUTH_EXPIRED';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('loadingState').classList.add('hidden');
+    showLoginScreen();
+  });
+
+  // ============ BOARD ============
+
+  function loadBoard(){
+    google.script.run
+      .withSuccessHandler(onBoardLoaded)
+      .withFailureHandler(onLoadError)
+      .getBoard(SESSION_TOKEN);
+  }
+
+  function onBoardLoaded(data){
+    CURRENT_USER = data.user;
+    PROJECTS = data.projects;
+    const whoami = document.getElementById('whoami');
+    whoami.innerHTML = 'מחובר כ-<b>' + esc(CURRENT_USER.email) + '</b> &nbsp;·&nbsp; <button class="signout" id="signoutBtn">התנתקות</button>';
+    whoami.classList.remove('hidden');
+    document.getElementById('signoutBtn').onclick = () => showLoginScreen();
+    document.getElementById('loadingState').classList.add('hidden');
+    document.getElementById('boardView').classList.remove('hidden');
+    renderFilters();
+    renderBoard();
+  }
+
+  function onLoadError(err){
+    if(isAuthExpired(err)){
+      showLoginScreen('פג תוקף ההתחברות, יש להתחבר מחדש.');
+      return;
+    }
+    document.getElementById('loadingState').classList.remove('hidden');
+    document.getElementById('boardView').classList.add('hidden');
+    document.getElementById('loadingState').textContent = 'שגיאה בטעינה: ' + (err && err.message ? err.message : err);
+  }
+
+  function renderFilters(){
+    const el = document.getElementById('statusFilters');
+    el.innerHTML = '';
+    FILTERS.forEach(f => {
+      const b = document.createElement('button');
+      b.className = 'chip' + (ACTIVE_FILTER === f.key ? ' active' : '');
+      b.textContent = f.label;
+      b.onclick = () => { ACTIVE_FILTER = f.key; renderFilters(); renderBoard(); };
+      el.appendChild(b);
+    });
+  }
+
+  function renderBoard(){
+    const board = document.getElementById('board');
+    board.innerHTML = '';
+    const list = ACTIVE_FILTER === 'all' ? PROJECTS : PROJECTS.filter(p => p.status === ACTIVE_FILTER);
+
+    if(list.length === 0){
+      board.innerHTML = '<div class="empty">אין פרויקטים להצגה כרגע. אולי הגיע הזמן להציע אחד?</div>';
+      return;
+    }
+
+    list.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.onclick = () => showDetail(p.id);
+      card.innerHTML =
+        '<div class="card-top">' +
+          '<div class="card-title">' + esc(p.title) + '</div>' +
+          '<div class="badge ' + p.status + '">' + STATUS_LABEL[p.status] + '</div>' +
+        '</div>' +
+        '<div class="card-desc">' + esc(p.description) + '</div>' +
+        '<div class="card-meta">' +
+          '<span class="cat">' + (CATEGORY_LABEL[p.category] || p.category) + '</span>' +
+          '<span>' + fmtDate(p.createdAt) + '</span>' +
+        '</div>';
+      board.appendChild(card);
+    });
+  }
+
+  function showDetail(id){
+    CURRENT_DETAIL_ID = id;
+    document.getElementById('boardView').classList.add('hidden');
+    document.getElementById('detailView').classList.remove('hidden');
+    renderDetail();
+  }
+
+  function renderDetail(){
+    const p = PROJECTS.find(x => x.id === CURRENT_DETAIL_ID);
+    if(!p) return;
+    const isMine = p.authorEmail === CURRENT_USER.email;
+    const isClaimant = p.claimedByEmail === CURRENT_USER.email;
+
+    let actionsHtml = '';
+    if(p.status === 'open' && !isMine){
+      actionsHtml = '<button class="btn-primary" id="claimBtn">אני לוקח את זה</button>';
+    } else if(p.status === 'open' && isMine){
+      actionsHtml = '<span class="detail-sub">ממתין שמישהו ייקח את הפרויקט</span>';
+    }
+
+    const el = document.getElementById('detailBody');
+    el.innerHTML =
+      '<div class="detail-head">' +
+        '<div>' +
+          '<h2>' + esc(p.title) + '</h2>' +
+          '<div class="detail-sub">' + (CATEGORY_LABEL[p.category] || p.category) + ' · הוצע ב-' + fmtDate(p.createdAt) +
+          (p.claimedByEmail ? ' · נלקח על ידי ' + esc(p.claimedByEmail) : '') + '</div>' +
+        '</div>' +
+        '<div class="badge ' + p.status + '">' + STATUS_LABEL[p.status] + '</div>' +
+      '</div>' +
+      '<div class="detail-desc">' + esc(p.description) + '</div>' +
+      '<div class="detail-actions">' + actionsHtml + '</div>' +
+      '<div id="errBox" class="err"></div>' +
+      '<div class="updates">' +
+        '<h3>עדכוני התקדמות</h3>' +
+        '<div id="updatesList"></div>' +
+        (isClaimant && p.status !== 'done' ? renderUpdateForm() : '') +
+      '</div>';
+
+    const updatesList = document.getElementById('updatesList');
+    if(p.updates.length === 0){
+      updatesList.innerHTML = '<div class="no-updates">אין עדכונים עדיין.</div>';
+    } else {
+      updatesList.innerHTML = p.updates.map(u =>
+        '<div class="update-item"><div class="u-text">' + esc(u.text) + '</div>' +
+        '<div class="u-meta">' + esc(u.authorEmail) + ' · ' + fmtDate(u.createdAt) + '</div></div>'
+      ).join('');
+    }
+
+    const claimBtn = document.getElementById('claimBtn');
+    if(claimBtn){
+      claimBtn.onclick = () => {
+        claimBtn.disabled = true;
+        claimBtn.textContent = 'לוקח...';
+        google.script.run
+          .withSuccessHandler(() => { loadBoardThenRedetail(); })
+          .withFailureHandler(err => showDetailError(err))
+          .claimProject(SESSION_TOKEN, p.id);
+      };
+    }
+
+    const updSubmit = document.getElementById('updSubmitBtn');
+    if(updSubmit){
+      updSubmit.onclick = () => {
+        const text = document.getElementById('updText').value.trim();
+        if(!text) return;
+        const markDone = document.getElementById('updDone').checked;
+        updSubmit.disabled = true;
+        updSubmit.textContent = 'שולח...';
+        google.script.run
+          .withSuccessHandler(() => { loadBoardThenRedetail(); })
+          .withFailureHandler(err => showDetailError(err))
+          .addUpdate(SESSION_TOKEN, { projectId: p.id, text: text, markDone: markDone });
+      };
+    }
+  }
+
+  function renderUpdateForm(){
+    return '<div class="update-form">' +
+      '<label for="updText">עדכון חדש</label>' +
+      '<textarea id="updText" placeholder="מה קרה מאז העדכון האחרון"></textarea>' +
+      '<div class="row">' +
+        '<label style="display:flex;align-items:center;gap:6px;font-weight:400;font-size:13px;color:var(--ink-soft);margin:0;">' +
+          '<input type="checkbox" id="updDone" style="width:auto;"> סמנו כפרויקט הושלם' +
+        '</label>' +
+      '</div>' +
+      '<div style="display:flex;justify-content:flex-end;">' +
+        '<button class="btn-primary" id="updSubmitBtn">פרסום עדכון</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function showDetailError(err){
+    if(isAuthExpired(err)){
+      showLoginScreen('פג תוקף ההתחברות, יש להתחבר מחדש.');
+      return;
+    }
+    const box = document.getElementById('errBox');
+    if(box){
+      box.textContent = (err && err.message) ? err.message : String(err);
+      box.style.display = 'block';
+    }
+  }
+
+  function loadBoardThenRedetail(){
+    google.script.run
+      .withSuccessHandler(data => {
+        CURRENT_USER = data.user;
+        PROJECTS = data.projects;
+        renderDetail();
+      })
+      .withFailureHandler(err => {
+        if(isAuthExpired(err)){
+          showLoginScreen('פג תוקף ההתחברות, יש להתחבר מחדש.');
+        } else {
+          onLoadError(err);
+        }
+      })
+      .getBoard(SESSION_TOKEN);
+  }
+
+  document.getElementById('backBtn').onclick = () => {
+    document.getElementById('detailView').classList.add('hidden');
+    document.getElementById('boardView').classList.remove('hidden');
+    renderBoard();
+  };
+
+  const overlay = document.getElementById('createOverlay');
+  document.getElementById('openCreate').onclick = () => {
+    document.getElementById('f-title').value = '';
+    document.getElementById('f-desc').value = '';
+    document.getElementById('f-cat').value = 'site';
+    document.getElementById('createErr').style.display = 'none';
+    overlay.classList.add('show');
+  };
+  document.getElementById('cancelCreate').onclick = () => overlay.classList.remove('show');
+
+  document.getElementById('submitCreate').onclick = () => {
+    const title = document.getElementById('f-title').value.trim();
+    const desc = document.getElementById('f-desc').value.trim();
+    const cat = document.getElementById('f-cat').value;
+    const errBox = document.getElementById('createErr');
+    if(!title || !desc){
+      errBox.textContent = 'צריך למלא שם ותיאור.';
+      errBox.style.display = 'block';
+      return;
+    }
+    const btn = document.getElementById('submitCreate');
+    btn.disabled = true;
+    btn.textContent = 'מפרסם...';
+    google.script.run
+      .withSuccessHandler(() => {
+        overlay.classList.remove('show');
+        btn.disabled = false;
+        btn.textContent = 'פרסום פרויקט';
+        loadBoard();
+      })
+      .withFailureHandler(err => {
+        if(isAuthExpired(err)){
+          overlay.classList.remove('show');
+          showLoginScreen('פג תוקף ההתחברות, יש להתחבר מחדש.');
+          return;
+        }
+        errBox.textContent = (err && err.message) ? err.message : String(err);
+        errBox.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'פרסום פרויקט';
+      })
+      .createProject(SESSION_TOKEN, { title: title, description: desc, category: cat });
+  };
+</script>
+</body>
+</html>
