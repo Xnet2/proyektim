@@ -524,11 +524,11 @@ document.getElementById('openCreateBtn').addEventListener('click', () => {
   document.getElementById('createForm').reset();
   document.getElementById('createOverlay').hidden = false;
 });
-document.querySelectorAll('[data-close]').forEach(btn => {
-  btn.addEventListener('click', () => { document.getElementById(btn.dataset.close).hidden = true; });
-});
-document.querySelectorAll('.overlay').forEach(ov => {
-  ov.addEventListener('click', e => { if (e.target === ov) ov.hidden = true; });
+document.addEventListener('click', e => {
+  const closeBtn = e.target.closest('[data-close]');
+  if (closeBtn){ document.getElementById(closeBtn.dataset.close).hidden = true; return; }
+  const overlay = e.target.closest('.overlay');
+  if (overlay && e.target === overlay){ overlay.hidden = true; }
 });
 
 document.getElementById('createForm').addEventListener('submit', async e => {
@@ -726,5 +726,6 @@ function showToast(msg){
   toastTimer = setTimeout(() => el.remove(), 3200);
 }
 </script>
+<script src="https://xnet2.github.io/status/xnet-badge.js"></script>
 </body>
 </html>
