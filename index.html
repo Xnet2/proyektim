@@ -190,11 +190,27 @@
 </div>
 
 <script>
-  // Captured immediately, before Google Identity Services touches window.google
-  // and potentially clobbers the APPS_SCRIPT_RUN binding Apps Script injects.
-  const APPS_SCRIPT_RUN = google.script.run;
-
   const GOOGLE_CLIENT_ID = '176938351727-t5cgglugm7cgf2j5b2g512jn2ol5agic.apps.googleusercontent.com';
+
+  // Apps Script injects google.script.run asynchronously as part of the
+  // page's sandbox handshake — it is not guaranteed to exist yet at parse
+  // time, especially on a slow connection. Instead of grabbing a reference
+  // once, poll for it right before each call.
+  function callServer(fnName, args, onSuccess, onFailure){
+    function attempt(retriesLeft){
+      if(window.google && google.script && google.script.run){
+        const call = google.script.run
+          .withSuccessHandler(onSuccess)
+          .withFailureHandler(onFailure || function(){});
+        call[fnName].apply(call, args);
+      } else if(retriesLeft > 0){
+        setTimeout(() => attempt(retriesLeft - 1), 150);
+      } else {
+        (onFailure || function(){})({ message: 'החיבור לשרת נכשל (חיבור איטי?). רעננו את הדף ונסו שוב.' });
+      }
+    }
+    attempt(40); // ~6 seconds of retrying
+  }
 
   let CURRENT_USER = null;
   let SESSION_TOKEN = null;
@@ -280,10 +296,8 @@
     document.getElementById('loginView').classList.add('hidden');
     document.getElementById('loadingState').classList.remove('hidden');
     document.getElementById('loadingState').textContent = 'מתחברים...';
-    APPS_SCRIPT_RUN
-      .withSuccessHandler(onLoginSuccess)
-      .withFailureHandler(err => showLoginScreen(err && err.message ? err.message : String(err)))
-      .login(email, name);
+    callServer('login', [email, name], onLoginSuccess,
+      err => showLoginScreen(err && err.message ? err.message : String(err)));
   }
 
   function onLoginSuccess(data){
@@ -305,10 +319,7 @@
   // ============ BOARD ============
 
   function loadBoard(){
-    APPS_SCRIPT_RUN
-      .withSuccessHandler(onBoardLoaded)
-      .withFailureHandler(onLoadError)
-      .getBoard(SESSION_TOKEN);
+    callServer('getBoard', [SESSION_TOKEN], onBoardLoaded, onLoadError);
   }
 
   function onBoardLoaded(data){
@@ -428,10 +439,9 @@
       claimBtn.onclick = () => {
         claimBtn.disabled = true;
         claimBtn.textContent = 'לוקח...';
-        APPS_SCRIPT_RUN
-          .withSuccessHandler(() => { loadBoardThenRedetail(); })
-          .withFailureHandler(err => showDetailError(err))
-          .claimProject(SESSION_TOKEN, p.id);
+        callServer('claimProject', [SESSION_TOKEN, p.id],
+          () => { loadBoardThenRedetail(); },
+          err => showDetailError(err));
       };
     }
 
@@ -443,10 +453,9 @@
         const markDone = document.getElementById('updDone').checked;
         updSubmit.disabled = true;
         updSubmit.textContent = 'שולח...';
-        APPS_SCRIPT_RUN
-          .withSuccessHandler(() => { loadBoardThenRedetail(); })
-          .withFailureHandler(err => showDetailError(err))
-          .addUpdate(SESSION_TOKEN, { projectId: p.id, text: text, markDone: markDone });
+        callServer('addUpdate', [SESSION_TOKEN, { projectId: p.id, text: text, markDone: markDone }],
+          () => { loadBoardThenRedetail(); },
+          err => showDetailError(err));
       };
     }
   }
@@ -479,20 +488,19 @@
   }
 
   function loadBoardThenRedetail(){
-    APPS_SCRIPT_RUN
-      .withSuccessHandler(data => {
+    callServer('getBoard', [SESSION_TOKEN],
+      data => {
         CURRENT_USER = data.user;
         PROJECTS = data.projects;
         renderDetail();
-      })
-      .withFailureHandler(err => {
+      },
+      err => {
         if(isAuthExpired(err)){
           showLoginScreen('פג תוקף ההתחברות, יש להתחבר מחדש.');
         } else {
           onLoadError(err);
         }
-      })
-      .getBoard(SESSION_TOKEN);
+      });
   }
 
   document.getElementById('backBtn').onclick = () => {
@@ -524,14 +532,14 @@
     const btn = document.getElementById('submitCreate');
     btn.disabled = true;
     btn.textContent = 'מפרסם...';
-    APPS_SCRIPT_RUN
-      .withSuccessHandler(() => {
+    callServer('createProject', [SESSION_TOKEN, { title: title, description: desc, category: cat }],
+      () => {
         overlay.classList.remove('show');
         btn.disabled = false;
         btn.textContent = 'פרסום פרויקט';
         loadBoard();
-      })
-      .withFailureHandler(err => {
+      },
+      err => {
         if(isAuthExpired(err)){
           overlay.classList.remove('show');
           showLoginScreen('פג תוקף ההתחברות, יש להתחבר מחדש.');
@@ -541,8 +549,7 @@
         errBox.style.display = 'block';
         btn.disabled = false;
         btn.textContent = 'פרסום פרויקט';
-      })
-      .createProject(SESSION_TOKEN, { title: title, description: desc, category: cat });
+      });
   };
 </script>
 </body>
