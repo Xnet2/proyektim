@@ -373,8 +373,21 @@ function decodeJwt(token){
 function handleCredentialResponse(response){
   const payload = decodeJwt(response.credential);
   currentUser = { email: payload.email, name: payload.name, picture: payload.picture };
+  saveUser(currentUser);
   renderAuthArea();
   renderBoard();
+}
+function saveUser(user){
+  try{ localStorage.setItem('lb_user', JSON.stringify(user)); } catch(e){}
+}
+function loadStoredUser(){
+  try{
+    const raw = localStorage.getItem('lb_user');
+    return raw ? JSON.parse(raw) : null;
+  } catch(e){ return null; }
+}
+function clearStoredUser(){
+  try{ localStorage.removeItem('lb_user'); } catch(e){}
 }
 function renderAuthArea(){
   const openBtn = document.getElementById('openCreateBtn');
@@ -394,6 +407,7 @@ function renderAuthArea(){
 }
 function logout(){
   currentUser = null;
+  clearStoredUser();
   google.accounts.id.disableAutoSelect();
   renderAuthArea();
   renderBoard();
@@ -403,7 +417,16 @@ function renderGsiButton(){
   google.accounts.id.renderButton(document.getElementById('gsiButton'),
     { theme:'outline', size:'medium', shape:'pill', text:'signin', locale:'iw' });
 }
-window.addEventListener('load', () => { renderGsiButton(); loadProjects(); });
+window.addEventListener('load', () => {
+  const stored = loadStoredUser();
+  if (stored){
+    currentUser = stored;
+    renderAuthArea();
+  } else {
+    renderGsiButton();
+  }
+  loadProjects();
+});
 
 /* ============ API ============ */
 async function apiGet(action){
