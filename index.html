@@ -4,7 +4,6 @@
 <base target="_top">
 <meta charset="utf-8">
 <title>אתר הפרויקטים</title>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root{
     --bg:#F7F6F2;
@@ -315,6 +314,20 @@
     document.getElementById('loadingState').classList.add('hidden');
     showLoginScreen();
   });
+
+  // Load Google's Sign-In library only after the page has fully loaded,
+  // so Apps Script's own postMessage-based bridge (which sets up
+  // google.script.run) has a head start and isn't raced/interfered with
+  // by GIS's own cross-origin messaging.
+  function loadGoogleSignIn(){
+    if(document.getElementById('gsi-client-script')) return;
+    const s = document.createElement('script');
+    s.id = 'gsi-client-script';
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.async = true;
+    document.head.appendChild(s);
+  }
+  window.addEventListener('load', () => setTimeout(loadGoogleSignIn, 300));
 
   // ============ BOARD ============
 
