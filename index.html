@@ -1,113 +1,233 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-<base target="_top">
-<meta charset="utf-8">
-<title>אתר הפרויקטים</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>לוח בנייה — מרעיון לפרויקט</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700;800&family=Assistant:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root{
-    --bg:#F7F6F2;
+    --bg:#F5F6FA;
     --surface:#FFFFFF;
-    --ink:#1C1D1B;
-    --ink-soft:#5C5B54;
-    --ink-faint:#98968C;
-    --line:#E4E2D9;
-    --accent:#3A5A7A;
-    --accent-ink:#EAF0F5;
-    --open:#2F6F4E;
-    --open-bg:#E7F3EB;
-    --progress:#A2600F;
-    --progress-bg:#FBEDD9;
-    --done:#6B6862;
-    --done-bg:#EEEDE7;
+    --ink:#14213D;
+    --ink-soft:#5B6478;
+    --line:#E3E6EF;
+    --line-strong:#CBD0E1;
+    --teal:#0EA894;
+    --teal-bg:#E3F7F3;
+    --amber:#F5A524;
+    --amber-bg:#FEF3DE;
+    --green:#2F9E67;
+    --green-bg:#E4F6EC;
     --radius:14px;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,"Helvetica Neue",sans-serif;
+    --shadow:0 1px 2px rgba(20,33,61,.04), 0 8px 24px -12px rgba(20,33,61,.12);
+    --font-display:'Rubik', 'Assistant', sans-serif;
+    --font-body:'Assistant', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
   }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);}
-  body{padding:0 0 4rem;}
-  .wrap{max-width:920px;margin:0 auto;padding:0 20px;}
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.001ms !important; transition-duration:.001ms !important; }
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    line-height:1.5;
+    min-height:100vh;
+  }
+  a{ color:inherit; }
+  button{ font-family:inherit; cursor:pointer; }
+  :focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
 
-  header.top{border-bottom:1px solid var(--line);background:var(--surface);}
-  .top-inner{max-width:920px;margin:0 auto;padding:28px 20px 22px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;}
-  .brand-mark{width:34px;height:34px;border-radius:9px;background:var(--accent);flex:none;position:relative;}
-  .brand-mark::after{content:"";position:absolute;inset:9px;border:2px solid var(--accent-ink);border-radius:4px;}
-  h1{font-size:22px;font-weight:600;margin:0 0 2px;letter-spacing:-.01em;}
-  .tagline{font-size:13.5px;color:var(--ink-soft);margin:0;}
-  .whoami{font-size:13px;color:var(--ink-faint);text-align:left;display:flex;align-items:center;gap:10px;}
-  .whoami b{color:var(--ink-soft);font-weight:600;}
-  .signout{border:none;background:none;color:var(--ink-faint);font-size:12.5px;cursor:pointer;text-decoration:underline;padding:0;}
+  /* ===== Header ===== */
+  header.top{
+    position:sticky; top:0; z-index:40;
+    background:rgba(245,246,250,.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .top-inner{
+    max-width:1120px; margin:0 auto; padding:14px 24px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-weight:700; font-size:1.1rem; }
+  .brand-mark{
+    width:30px; height:30px; border-radius:8px;
+    background:var(--ink); position:relative; flex:none;
+  }
+  .brand-mark::before, .brand-mark::after{
+    content:''; position:absolute; background:var(--teal); border-radius:1px;
+  }
+  .brand-mark::before{ width:12px; height:2px; top:9px; right:9px; }
+  .brand-mark::after{ width:2px; height:12px; top:9px; right:9px; }
 
-  .toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:26px 0 18px;flex-wrap:wrap;}
-  .filters{display:flex;gap:6px;flex-wrap:wrap;}
-  .chip{border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);font-size:13px;padding:6px 13px;border-radius:99px;cursor:pointer;transition:.15s;}
-  .chip:hover{border-color:var(--ink-faint);}
-  .chip.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .auth-area{ display:flex; align-items:center; gap:12px; }
+  .user-chip{
+    display:flex; align-items:center; gap:8px;
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:999px; padding:5px 6px 5px 14px; font-size:.88rem;
+  }
+  .user-chip img{ width:26px; height:26px; border-radius:50%; }
+  .btn-logout{
+    background:none; border:none; color:var(--ink-soft); font-size:.82rem;
+    text-decoration:underline; padding:0;
+  }
 
-  .btn-new{background:var(--accent);color:#fff;border:none;font-size:14px;font-weight:600;padding:10px 18px;border-radius:10px;cursor:pointer;}
-  .btn-new:hover{opacity:.92;}
+  /* ===== Hero ===== */
+  .hero{
+    max-width:1120px; margin:0 auto; padding:56px 24px 40px;
+    display:grid; grid-template-columns:1.1fr .9fr; gap:32px; align-items:center;
+  }
+  @media (max-width:820px){ .hero{ grid-template-columns:1fr; padding-top:36px; } }
+  .eyebrow{
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.06em;
+    color:var(--teal); text-transform:uppercase; margin:0 0 10px;
+  }
+  h1{
+    font-family:var(--font-display); font-weight:800; font-size:2.6rem;
+    line-height:1.12; margin:0 0 16px; letter-spacing:-.01em;
+  }
+  @media (max-width:560px){ h1{ font-size:2rem; } }
+  .hero p{ color:var(--ink-soft); font-size:1.05rem; max-width:46ch; margin:0 0 24px; }
+  .hero-actions{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .btn-primary{
+    background:var(--ink); color:#fff; border:none; border-radius:10px;
+    padding:13px 22px; font-size:.98rem; font-weight:600; font-family:var(--font-body);
+    transition:transform .15s ease, background .15s ease;
+  }
+  .btn-primary:hover{ background:#20305a; transform:translateY(-1px); }
+  .btn-primary:disabled{ background:var(--line-strong); color:#8b91a3; cursor:not-allowed; transform:none; }
+  .hint-text{ font-size:.85rem; color:var(--ink-soft); }
 
-  #board{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 17px;cursor:pointer;transition:.15s;display:flex;flex-direction:column;gap:10px;}
-  .card:hover{border-color:var(--ink-faint);transform:translateY(-1px);}
-  .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
-  .card-title{font-size:15.5px;font-weight:600;line-height:1.35;}
-  .badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px;white-space:nowrap;flex:none;}
-  .badge.open{color:var(--open);background:var(--open-bg);}
-  .badge.in_progress{color:var(--progress);background:var(--progress-bg);}
-  .badge.done{color:var(--done);background:var(--done-bg);}
-  .card-desc{font-size:13.5px;color:var(--ink-soft);line-height:1.5;flex:1;
-    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
-  .card-meta{font-size:12px;color:var(--ink-faint);display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:10px;}
-  .cat{text-transform:uppercase;letter-spacing:.04em;font-size:10.5px;color:var(--ink-faint);}
+  /* blueprint panel */
+  .blueprint{
+    background:var(--ink); border-radius:20px; aspect-ratio:4/3; position:relative;
+    overflow:hidden;
+    background-image:
+      linear-gradient(rgba(255,255,255,.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.07) 1px, transparent 1px);
+    background-size:28px 28px;
+  }
+  .blueprint::before{
+    content:''; position:absolute; inset:0;
+    background:radial-gradient(circle at 30% 25%, rgba(14,168,148,.35), transparent 55%);
+  }
+  .blueprint .tag{
+    position:absolute; font-family:var(--font-mono); font-size:.72rem; color:#fff;
+    border:1px dashed rgba(255,255,255,.5); border-radius:8px; padding:6px 10px;
+    background:rgba(255,255,255,.06);
+  }
+  .blueprint .tag.t1{ top:14%; right:10%; }
+  .blueprint .tag.t2{ bottom:20%; left:12%; transform:rotate(-3deg); }
+  .blueprint .tag.t3{ top:48%; right:38%; transform:rotate(2deg); }
+  .blueprint .stamp{
+    position:absolute; bottom:9%; right:8%;
+    font-family:var(--font-display); font-weight:700; font-size:.95rem; color:var(--teal);
+    border:2px solid var(--teal); border-radius:10px; padding:8px 14px;
+    transform:rotate(-6deg); letter-spacing:.02em;
+  }
 
-  .empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--ink-faint);font-size:14px;}
+  /* ===== Filters ===== */
+  .filters{
+    max-width:1120px; margin:0 auto; padding:0 24px 20px;
+    display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between;
+  }
+  .status-tabs{ display:flex; gap:6px; background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:4px; }
+  .status-tabs button{
+    border:none; background:none; padding:7px 14px; border-radius:999px; font-size:.86rem;
+    color:var(--ink-soft); font-weight:600; transition:background .15s ease, color .15s ease;
+  }
+  .status-tabs button.active{ background:var(--ink); color:#fff; }
+  .filter-right{ display:flex; gap:10px; flex-wrap:wrap; }
+  select, input[type=text]{
+    font-family:inherit; border:1px solid var(--line); background:var(--surface);
+    border-radius:10px; padding:9px 12px; font-size:.88rem; color:var(--ink);
+  }
 
-  .overlay{position:fixed;inset:0;background:rgba(28,29,27,.4);display:none;align-items:flex-start;justify-content:center;padding:6vh 16px;overflow:auto;z-index:50;}
-  .overlay.show{display:flex;}
-  .modal{background:var(--surface);border-radius:16px;max-width:520px;width:100%;padding:26px 26px 22px;}
-  .modal h2{font-size:18px;margin:0 0 16px;font-weight:600;}
-  label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);margin:14px 0 6px;}
-  input[type=text],textarea,select{width:100%;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;background:#FCFCFA;color:var(--ink);}
-  textarea{resize:vertical;min-height:80px;}
-  input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent);}
-  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;}
-  .btn-ghost{background:none;border:1px solid var(--line);color:var(--ink-soft);padding:9px 16px;border-radius:9px;font-size:13.5px;cursor:pointer;}
-  .btn-primary{background:var(--ink);color:#fff;border:none;padding:9px 18px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;}
-  .btn-primary:disabled{opacity:.5;cursor:default;}
-  .err{color:#B33A3A;font-size:13px;margin-top:10px;display:none;}
+  /* ===== Board ===== */
+  .board{ max-width:1120px; margin:0 auto; padding:0 24px 80px; }
+  .grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:16px;
+  }
+  .card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:18px 18px 16px; position:relative; box-shadow:var(--shadow);
+    border-inline-start:4px solid var(--line-strong);
+    display:flex; flex-direction:column; gap:10px;
+    animation:rise .35s ease both;
+  }
+  @keyframes rise{ from{ opacity:0; transform:translateY(6px);} to{ opacity:1; transform:translateY(0);} }
+  .card.status-open{ border-inline-start-color:var(--teal); }
+  .card.status-progress{ border-inline-start-color:var(--amber); }
+  .card.status-done{ border-inline-start-color:var(--green); }
 
-  .detail-back{background:none;border:none;color:var(--ink-faint);font-size:13px;cursor:pointer;padding:0;margin-bottom:14px;}
-  .detail{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px 26px;}
-  .detail-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;}
-  .detail h2{font-size:19px;margin:0 0 4px;font-weight:600;}
-  .detail-sub{font-size:12.5px;color:var(--ink-faint);}
-  .detail-desc{margin:16px 0;font-size:14.5px;line-height:1.65;color:var(--ink);white-space:pre-wrap;}
-  .detail-actions{display:flex;gap:8px;margin:18px 0 4px;}
+  .card-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+  .type-tag{
+    font-family:var(--font-mono); font-size:.68rem; color:var(--ink-soft);
+    border:1px solid var(--line); border-radius:6px; padding:3px 7px; white-space:nowrap;
+  }
+  .stamp-badge{
+    font-family:var(--font-display); font-weight:700; font-size:.66rem; letter-spacing:.03em;
+    border-radius:8px; padding:4px 9px; transform:rotate(-4deg); white-space:nowrap;
+  }
+  .status-open .stamp-badge{ color:var(--teal); border:1.5px dashed var(--teal); background:var(--teal-bg); }
+  .status-progress .stamp-badge{ color:#9a6b0c; border:1.5px dashed var(--amber); background:var(--amber-bg); }
+  .status-done .stamp-badge{ color:var(--green); border:1.5px dashed var(--green); background:var(--green-bg); }
 
-  .updates{margin-top:22px;border-top:1px solid var(--line);padding-top:18px;}
-  .updates h3{font-size:13.5px;font-weight:600;color:var(--ink-soft);margin:0 0 12px;}
-  .update-item{padding:10px 0;border-bottom:1px solid var(--line);}
-  .update-item:last-child{border-bottom:none;}
-  .update-item .u-text{font-size:14px;line-height:1.55;}
-  .update-item .u-meta{font-size:11.5px;color:var(--ink-faint);margin-top:3px;}
-  .no-updates{font-size:13px;color:var(--ink-faint);}
+  .card h3{ font-family:var(--font-display); font-size:1.08rem; margin:0; line-height:1.3; }
+  .card p.desc{ color:var(--ink-soft); font-size:.9rem; margin:0; flex:1; }
+  .card .meta{ font-size:.78rem; color:var(--ink-soft); display:flex; flex-direction:column; gap:2px; }
+  .card .notes{
+    font-size:.82rem; background:var(--bg); border-radius:8px; padding:8px 10px; color:var(--ink);
+  }
+  .card-actions{ display:flex; gap:8px; margin-top:4px; }
+  .btn-sm{
+    border-radius:8px; padding:8px 12px; font-size:.82rem; font-weight:600; border:1px solid transparent; flex:1;
+  }
+  .btn-claim{ background:var(--ink); color:#fff; }
+  .btn-claim:hover{ background:#20305a; }
+  .btn-outline{ background:none; border:1px solid var(--line-strong); color:var(--ink); }
+  .btn-outline:hover{ background:var(--bg); }
 
-  .update-form{margin-top:16px;display:flex;flex-direction:column;gap:8px;}
-  .update-form .row{display:flex;gap:8px;align-items:center;}
+  .empty{
+    text-align:center; padding:70px 20px; color:var(--ink-soft);
+    border:1px dashed var(--line-strong); border-radius:var(--radius); background:var(--surface);
+  }
+  .empty strong{ display:block; color:var(--ink); font-family:var(--font-display); font-size:1.1rem; margin-bottom:6px; }
+  .loading{ text-align:center; padding:60px 0; color:var(--ink-soft); font-family:var(--font-mono); font-size:.85rem; }
 
-  .loading{text-align:center;padding:60px 0;color:var(--ink-faint);font-size:14px;}
-  .hidden{display:none !important;}
+  /* ===== Modal ===== */
+  .overlay{
+    position:fixed; inset:0; background:rgba(20,33,61,.45);
+    display:flex; align-items:center; justify-content:center; padding:20px; z-index:100;
+  }
+  .overlay[hidden]{ display:none; }
+  .modal{
+    background:var(--surface); border-radius:16px; padding:26px; width:100%; max-width:440px;
+    box-shadow:0 20px 60px -20px rgba(20,33,61,.4);
+    animation:pop .18s ease both;
+  }
+  @keyframes pop{ from{ opacity:0; transform:scale(.97);} to{ opacity:1; transform:scale(1);} }
+  .modal h2{ font-family:var(--font-display); font-size:1.25rem; margin:0 0 16px; }
+  .field{ margin-bottom:14px; display:flex; flex-direction:column; gap:6px; }
+  .field label{ font-size:.82rem; font-weight:600; color:var(--ink-soft); }
+  .field input, .field textarea, .field select{
+    font-family:inherit; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:.92rem; width:100%;
+  }
+  .field textarea{ min-height:80px; resize:vertical; }
+  .modal-actions{ display:flex; gap:10px; margin-top:18px; }
+  .btn-ghost{ background:none; border:1px solid var(--line-strong); border-radius:10px; padding:11px 16px; font-weight:600; flex:1; }
 
-  .login-screen{max-width:400px;margin:14vh auto 0;text-align:center;}
-  .login-screen .brand-mark{margin:0 auto 18px;}
-  .login-screen h2{font-size:19px;margin:0 0 6px;font-weight:600;}
-  .login-screen p{color:var(--ink-soft);font-size:14px;margin:0 0 24px;}
-  .login-btn-wrap{display:flex;justify-content:center;}
-
-  @media (max-width:600px){
-    .top-inner{flex-direction:column;align-items:flex-start;}
-    .whoami{text-align:right;}
+  /* ===== Toast ===== */
+  .toast{
+    position:fixed; bottom:20px; right:20px; background:var(--ink); color:#fff;
+    padding:12px 18px; border-radius:10px; font-size:.88rem; box-shadow:var(--shadow);
+    z-index:200; animation:pop .18s ease both;
   }
 </style>
 </head>
@@ -115,455 +235,374 @@
 
 <header class="top">
   <div class="top-inner">
-    <div style="display:flex;gap:12px;align-items:center;">
-      <div class="brand-mark"></div>
-      <div>
-        <h1>אתר הפרויקטים</h1>
-        <p class="tagline">מציעים רעיון, לוקחים על עצמכם פרויקט, מדווחים על התקדמות</p>
-      </div>
+    <div class="brand"><span class="brand-mark"></span> לוח בנייה</div>
+    <div class="auth-area" id="authArea">
+      <div id="gsiButton"></div>
     </div>
-    <div class="whoami hidden" id="whoami"></div>
   </div>
 </header>
 
-<div class="wrap">
-
-  <div id="loginView" class="hidden login-screen">
-    <div class="brand-mark"></div>
-    <h2>ברוכים הבאים</h2>
-    <p>יש להתחבר עם חשבון Google כדי להמשיך</p>
-    <div class="login-btn-wrap">
-      <div id="g_id_onload"
-           data-client_id="176938351727-t5cgglugm7cgf2j5b2g512jn2ol5agic.apps.googleusercontent.com"
-           data-callback="handleCredentialResponse"
-           data-auto_prompt="false">
-      </div>
-      <div class="g_id_signin"
-           data-type="standard"
-           data-theme="outline"
-           data-size="large"
-           data-locale="he"
-           data-text="signin_with">
-      </div>
+<section class="hero">
+  <div>
+    <p class="eyebrow">// לוח פרויקטים קהילתי</p>
+    <h1>מהרעיון שלך<br>לפרויקט חי</h1>
+    <p>מפרסמים רעיון לאתר, אפליקציה או תוכנת מחשב — ומישהו אחר לוקח אותו על עצמו ומעדכן איך זה מתקדם. בלי ניירת, רק שיתוף פעולה.</p>
+    <div class="hero-actions">
+      <button class="btn-primary" id="openCreateBtn" disabled>פרסמו רעיון חדש</button>
+      <span class="hint-text" id="loginHint">התחברו עם גוגל כדי לפרסם או לקחת פרויקט</span>
     </div>
-    <div class="err" id="loginErr"></div>
   </div>
-
-  <div id="loadingState" class="loading">טוען...</div>
-
-  <div id="boardView" class="hidden">
-    <div class="toolbar">
-      <div class="filters" id="statusFilters"></div>
-      <button class="btn-new" id="openCreate">+ הצעת פרויקט</button>
-    </div>
-    <div id="board"></div>
+  <div class="blueprint" aria-hidden="true">
+    <span class="tag t1">אתר</span>
+    <span class="tag t2">אפליקציה</span>
+    <span class="tag t3">תוכנה</span>
+    <span class="stamp">בבנייה</span>
   </div>
+</section>
 
-  <div id="detailView" class="hidden">
-    <button class="detail-back" id="backBtn">→ חזרה לרשימה</button>
-    <div class="detail" id="detailBody"></div>
+<div class="filters">
+  <div class="status-tabs" id="statusTabs">
+    <button data-status="all" class="active">הכל</button>
+    <button data-status="Open">פתוח</button>
+    <button data-status="In Progress">בבנייה</button>
+    <button data-status="Done">הושלם</button>
+  </div>
+  <div class="filter-right">
+    <select id="typeFilter">
+      <option value="all">כל הסוגים</option>
+      <option value="אתר">אתר</option>
+      <option value="אפליקציה">אפליקציה</option>
+      <option value="תוכנת מחשב">תוכנת מחשב</option>
+    </select>
+    <input type="text" id="searchInput" placeholder="חיפוש חופשי…">
   </div>
 </div>
 
-<div class="overlay" id="createOverlay">
+<main class="board">
+  <div id="boardContent" class="loading">טוען פרויקטים…</div>
+</main>
+
+<!-- Create modal -->
+<div class="overlay" id="createOverlay" hidden>
   <div class="modal">
-    <h2>הצעת פרויקט חדש</h2>
-    <label for="f-title">שם הפרויקט</label>
-    <input type="text" id="f-title" placeholder="למשל: תוסף כרום לחיפוש מהיר בטאבים">
-    <label for="f-cat">סוג</label>
-    <select id="f-cat">
-      <option value="site">אתר</option>
-      <option value="extension">תוסף לדפדפן</option>
-      <option value="app">אפליקציה</option>
-      <option value="desktop">תוכנה למחשב</option>
-      <option value="other">אחר</option>
-    </select>
-    <label for="f-desc">תיאור מפורט</label>
-    <textarea id="f-desc" placeholder="מה בדיוק המוצר אמור לעשות, למי הוא מיועד, ומה חשוב שיהיה בו"></textarea>
-    <div class="err" id="createErr"></div>
-    <div class="modal-actions">
-      <button class="btn-ghost" id="cancelCreate">ביטול</button>
-      <button class="btn-primary" id="submitCreate">פרסום פרויקט</button>
-    </div>
+    <h2>פרויקט חדש</h2>
+    <form id="createForm">
+      <div class="field">
+        <label for="cTitle">שם הפרויקט</label>
+        <input type="text" id="cTitle" required maxlength="80">
+      </div>
+      <div class="field">
+        <label for="cType">סוג</label>
+        <select id="cType">
+          <option value="אתר">אתר</option>
+          <option value="אפליקציה">אפליקציה</option>
+          <option value="תוכנת מחשב">תוכנת מחשב</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="cDesc">מה בדיוק רוצים שיקרה?</label>
+        <textarea id="cDesc" required maxlength="600" placeholder="תארו את הרעיון, מה הוא פותר, ולמי הוא מיועד"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" data-close="createOverlay">ביטול</button>
+        <button type="submit" class="btn-primary" style="flex:1">פרסום</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Update modal -->
+<div class="overlay" id="updateOverlay" hidden>
+  <div class="modal">
+    <h2>עדכון התקדמות</h2>
+    <form id="updateForm">
+      <input type="hidden" id="uProjectId">
+      <div class="field">
+        <label for="uStatus">סטטוס</label>
+        <select id="uStatus">
+          <option value="In Progress">בבנייה</option>
+          <option value="Done">הושלם</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="uNotes">מה קרה עד עכשיו?</label>
+        <textarea id="uNotes" maxlength="600" placeholder="עדכון קצר על ההתקדמות"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" data-close="updateOverlay">ביטול</button>
+        <button type="submit" class="btn-primary" style="flex:1">שמירה</button>
+      </div>
+    </form>
   </div>
 </div>
 
 <script>
-  const GOOGLE_CLIENT_ID = '176938351727-t5cgglugm7cgf2j5b2g512jn2ol5agic.apps.googleusercontent.com';
+/* ============ הגדרות צד לקוח בלבד ============ */
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby1aW_Hi1suSVQmBfU9sp9jQ80xXiFSImLBnLhElP4LmUjF7mOhi0HizeOnz63GCEXg/exec';
+const GOOGLE_CLIENT_ID = '176938351727-t5cgglugm7cgf2j5b2g512jn2ol5agic.apps.googleusercontent.com';
 
-  // Apps Script injects google.script.run asynchronously as part of the
-  // page's sandbox handshake — it is not guaranteed to exist yet at parse
-  // time, especially on a slow connection. Instead of grabbing a reference
-  // once, poll for it right before each call.
-  function callServer(fnName, args, onSuccess, onFailure){
-    function attempt(retriesLeft){
-      if(window.google && google.script && google.script.run){
-        const call = google.script.run
-          .withSuccessHandler(onSuccess)
-          .withFailureHandler(onFailure || function(){});
-        call[fnName].apply(call, args);
-      } else if(retriesLeft > 0){
-        setTimeout(() => attempt(retriesLeft - 1), 150);
-      } else {
-        (onFailure || function(){})({ message: 'החיבור לשרת נכשל (חיבור איטי?). רעננו את הדף ונסו שוב.' });
-      }
-    }
-    attempt(40); // ~6 seconds of retrying
+/* ============ מצב ============ */
+let currentUser = null; // {email, name, picture}
+let allProjects = [];
+let statusFilter = 'all';
+let typeFilter = 'all';
+let searchTerm = '';
+
+const STATUS_LABEL = { 'Open':'פתוח', 'In Progress':'בבנייה', 'Done':'הושלם' };
+const STATUS_CLASS = { 'Open':'status-open', 'In Progress':'status-progress', 'Done':'status-done' };
+
+/* ============ Google Sign-In ============ */
+function decodeJwt(token){
+  const base64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+  const json = decodeURIComponent(atob(base64).split('').map(c =>
+    '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+  return JSON.parse(json);
+}
+
+function handleCredentialResponse(response){
+  const payload = decodeJwt(response.credential);
+  currentUser = { email: payload.email, name: payload.name, picture: payload.picture };
+  renderAuthArea();
+  renderBoard();
+}
+
+function renderAuthArea(){
+  const openBtn = document.getElementById('openCreateBtn');
+  const hint = document.getElementById('loginHint');
+  const area = document.getElementById('authArea');
+
+  if (currentUser){
+    openBtn.disabled = false;
+    hint.style.display = 'none';
+    area.innerHTML = `
+      <div class="user-chip">
+        <img src="${currentUser.picture}" alt="">
+        <span>${escapeHtml(currentUser.name)}</span>
+        <button class="btn-logout" id="logoutBtn">יציאה</button>
+      </div>`;
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+  } else {
+    openBtn.disabled = true;
+    hint.style.display = '';
+    area.innerHTML = `<div id="gsiButton"></div>`;
+    renderGsiButton();
   }
+}
 
-  let CURRENT_USER = null;
-  let SESSION_TOKEN = null;
-  let PROJECTS = [];
-  let ACTIVE_FILTER = 'all';
-  let CURRENT_DETAIL_ID = null;
+function logout(){
+  currentUser = null;
+  google.accounts.id.disableAutoSelect();
+  renderAuthArea();
+  renderBoard();
+}
 
-  const STATUS_LABEL = { open: 'פתוח', in_progress: 'בתהליך', done: 'הושלם' };
-  const CATEGORY_LABEL = { site: 'אתר', extension: 'תוסף דפדפן', app: 'אפליקציה', desktop: 'תוכנה למחשב', other: 'אחר' };
-  const FILTERS = [
-    { key: 'all', label: 'הכל' },
-    { key: 'open', label: 'פתוחים' },
-    { key: 'in_progress', label: 'בתהליך' },
-    { key: 'done', label: 'הושלמו' }
-  ];
+function renderGsiButton(){
+  google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleCredentialResponse
+  });
+  google.accounts.id.renderButton(
+    document.getElementById('gsiButton'),
+    { theme:'outline', size:'medium', shape:'pill', text:'signin', locale:'iw' }
+  );
+}
 
-  function esc(s){
-    const d = document.createElement('div');
-    d.textContent = (s === undefined || s === null) ? '' : String(s);
-    return d.innerHTML;
+window.addEventListener('load', () => {
+  renderGsiButton();
+  loadProjects();
+});
+
+/* ============ API ============ */
+async function apiGet(action){
+  const res = await fetch(`${SCRIPT_URL}?action=${encodeURIComponent(action)}`);
+  return res.json();
+}
+async function apiPost(action, payload){
+  const res = await fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action, email: currentUser.email, name: currentUser.name, ...payload })
+  });
+  return res.json();
+}
+
+async function loadProjects(){
+  const board = document.getElementById('boardContent');
+  board.className = 'loading';
+  board.textContent = 'טוען פרויקטים…';
+  try{
+    const data = await apiGet('list');
+    if (!data.ok) throw new Error(data.error || 'שגיאה');
+    allProjects = data.projects.sort((a,b) => new Date(b.CreatedAt) - new Date(a.CreatedAt));
+    renderBoard();
+  } catch(err){
+    board.className = 'empty';
+    board.innerHTML = `<strong>לא הצלחנו לטעון את הלוח</strong>יש לוודא שהסקריפט פרוס כ"Anyone can access".<br><button class="btn-outline btn-sm" style="margin-top:12px" onclick="loadProjects()">נסו שוב</button>`;
   }
+}
 
-  function fmtDate(iso){
-    if(!iso) return '';
-    const d = new Date(iso);
-    return d.toLocaleDateString('he-IL', { day:'numeric', month:'short', year:'numeric' });
-  }
+/* ============ רינדור ============ */
+function escapeHtml(str){
+  return (str||'').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+}
 
-  // ============ AUTH ============
-
-  function showLoginScreen(message){
-    SESSION_TOKEN = null;
-    CURRENT_USER = null;
-    document.getElementById('loadingState').classList.add('hidden');
-    document.getElementById('boardView').classList.add('hidden');
-    document.getElementById('detailView').classList.add('hidden');
-    document.getElementById('whoami').classList.add('hidden');
-    document.getElementById('loginView').classList.remove('hidden');
-    const errBox = document.getElementById('loginErr');
-    if(message){
-      errBox.textContent = message;
-      errBox.style.display = 'block';
-    } else {
-      errBox.style.display = 'none';
-    }
-  }
-
-  // Decodes the payload segment of a JWT (base64url) without any network
-  // call. This does NOT verify the token's signature — it only reads the
-  // claims Google's Sign-In popup already attached to it client-side.
-  function decodeJwtPayload(token){
-    const part = token.split('.')[1];
-    const base64 = part.replace(/-/g, '+').replace(/_/g, '/');
-    const padded = base64 + '==='.slice((base64.length + 3) % 4);
-    const raw = atob(padded);
-    const jsonStr = decodeURIComponent(
-      raw.split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')
-    );
-    return JSON.parse(jsonStr);
-  }
-
-  function handleCredentialResponse(response){
-    let payload;
-    try {
-      payload = decodeJwtPayload(response.credential);
-    } catch(e){
-      showLoginScreen('שגיאה בפענוח פרטי ההתחברות.');
-      return;
-    }
-
-    if(payload.aud !== GOOGLE_CLIENT_ID){
-      showLoginScreen('הטוקן לא שייך לאפליקציה הזו.');
-      return;
-    }
-    if(payload.email_verified !== true && payload.email_verified !== 'true'){
-      showLoginScreen('כתובת האימייל אינה מאומתת על ידי גוגל.');
-      return;
-    }
-
-    const email = payload.email;
-    const name = payload.name || (email ? email.split('@')[0] : '');
-
-    document.getElementById('loginView').classList.add('hidden');
-    document.getElementById('loadingState').classList.remove('hidden');
-    document.getElementById('loadingState').textContent = 'מתחברים...';
-    callServer('login', [email, name], onLoginSuccess,
-      err => showLoginScreen(err && err.message ? err.message : String(err)));
-  }
-
-  function onLoginSuccess(data){
-    SESSION_TOKEN = data.sessionToken;
-    CURRENT_USER = data.user;
-    document.getElementById('loadingState').textContent = 'טוען פרויקטים...';
-    loadBoard();
-  }
-
-  function isAuthExpired(err){
-    return err && err.message === 'AUTH_EXPIRED';
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('loadingState').classList.add('hidden');
-    showLoginScreen();
+function renderBoard(){
+  const board = document.getElementById('boardContent');
+  let list = allProjects.filter(p => {
+    if (statusFilter !== 'all' && p.Status !== statusFilter) return false;
+    if (typeFilter !== 'all' && p.Type !== typeFilter) return false;
+    if (searchTerm && !(p.Title + p.Description).toLowerCase().includes(searchTerm.toLowerCase())) return false;
+    return true;
   });
 
-  // Load Google's Sign-In library only after the page has fully loaded,
-  // so Apps Script's own postMessage-based bridge (which sets up
-  // google.script.run) has a head start and isn't raced/interfered with
-  // by GIS's own cross-origin messaging.
-  function loadGoogleSignIn(){
-    if(document.getElementById('gsi-client-script')) return;
-    const s = document.createElement('script');
-    s.id = 'gsi-client-script';
-    s.src = 'https://accounts.google.com/gsi/client';
-    s.async = true;
-    document.head.appendChild(s);
-  }
-  window.addEventListener('load', () => setTimeout(loadGoogleSignIn, 300));
-
-  // ============ BOARD ============
-
-  function loadBoard(){
-    callServer('getBoard', [SESSION_TOKEN], onBoardLoaded, onLoadError);
+  if (list.length === 0){
+    board.className = 'empty';
+    board.innerHTML = `<strong>אין עדיין פרויקטים כאלה</strong>זה מקום טוב להיות הראשונים לפרסם רעיון.`;
+    return;
   }
 
-  function onBoardLoaded(data){
-    CURRENT_USER = data.user;
-    PROJECTS = data.projects;
-    const whoami = document.getElementById('whoami');
-    whoami.innerHTML = 'מחובר כ-<b>' + esc(CURRENT_USER.email) + '</b> &nbsp;·&nbsp; <button class="signout" id="signoutBtn">התנתקות</button>';
-    whoami.classList.remove('hidden');
-    document.getElementById('signoutBtn').onclick = () => showLoginScreen();
-    document.getElementById('loadingState').classList.add('hidden');
-    document.getElementById('boardView').classList.remove('hidden');
-    renderFilters();
-    renderBoard();
+  board.className = 'grid';
+  board.innerHTML = list.map(cardHtml).join('');
+
+  list.forEach(p => {
+    const claimBtn = document.getElementById('claim-' + p.ID);
+    if (claimBtn) claimBtn.addEventListener('click', () => claimProject(p.ID));
+    const unclaimBtn = document.getElementById('unclaim-' + p.ID);
+    if (unclaimBtn) unclaimBtn.addEventListener('click', () => unclaimProject(p.ID));
+    const updateBtn = document.getElementById('update-' + p.ID);
+    if (updateBtn) updateBtn.addEventListener('click', () => openUpdateModal(p));
+  });
+}
+
+function cardHtml(p){
+  const statusClass = STATUS_CLASS[p.Status] || 'status-open';
+  const isMine = currentUser && p.ClaimedByEmail === currentUser.email;
+  const isOpen = p.Status === 'Open';
+
+  let actions = '';
+  if (isOpen){
+    actions = `<button class="btn-sm btn-claim" id="claim-${p.ID}">לקחת על עצמי</button>`;
+  } else if (isMine){
+    actions = `
+      <button class="btn-sm btn-claim" id="update-${p.ID}">עדכון התקדמות</button>
+      <button class="btn-sm btn-outline" id="unclaim-${p.ID}">לשחרר</button>`;
   }
 
-  function onLoadError(err){
-    if(isAuthExpired(err)){
-      showLoginScreen('פג תוקף ההתחברות, יש להתחבר מחדש.');
-      return;
-    }
-    document.getElementById('loadingState').classList.remove('hidden');
-    document.getElementById('boardView').classList.add('hidden');
-    document.getElementById('loadingState').textContent = 'שגיאה בטעינה: ' + (err && err.message ? err.message : err);
-  }
+  return `
+    <article class="card ${statusClass}">
+      <div class="card-top">
+        <span class="type-tag">${escapeHtml(p.Type)}</span>
+        <span class="stamp-badge">${STATUS_LABEL[p.Status] || p.Status}</span>
+      </div>
+      <h3>${escapeHtml(p.Title)}</h3>
+      <p class="desc">${escapeHtml(p.Description)}</p>
+      ${p.ProgressNotes ? `<div class="notes">${escapeHtml(p.ProgressNotes)}</div>` : ''}
+      <div class="meta">
+        <span>פורסם ע"י ${escapeHtml(p.CreatorName)}</span>
+        ${p.ClaimedByName ? `<span>מבוצע ע"י ${escapeHtml(p.ClaimedByName)}</span>` : ''}
+      </div>
+      ${actions ? `<div class="card-actions">${actions}</div>` : ''}
+    </article>`;
+}
 
-  function renderFilters(){
-    const el = document.getElementById('statusFilters');
-    el.innerHTML = '';
-    FILTERS.forEach(f => {
-      const b = document.createElement('button');
-      b.className = 'chip' + (ACTIVE_FILTER === f.key ? ' active' : '');
-      b.textContent = f.label;
-      b.onclick = () => { ACTIVE_FILTER = f.key; renderFilters(); renderBoard(); };
-      el.appendChild(b);
+/* ============ פילטרים ============ */
+document.getElementById('statusTabs').addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  document.querySelectorAll('#statusTabs button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  statusFilter = btn.dataset.status;
+  renderBoard();
+});
+document.getElementById('typeFilter').addEventListener('change', e => { typeFilter = e.target.value; renderBoard(); });
+document.getElementById('searchInput').addEventListener('input', e => { searchTerm = e.target.value; renderBoard(); });
+
+/* ============ יצירת פרויקט ============ */
+document.getElementById('openCreateBtn').addEventListener('click', () => {
+  if (!currentUser) return;
+  document.getElementById('createOverlay').hidden = false;
+});
+document.querySelectorAll('[data-close]').forEach(btn => {
+  btn.addEventListener('click', () => { document.getElementById(btn.dataset.close).hidden = true; });
+});
+document.getElementById('createForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const submitBtn = e.target.querySelector('button[type=submit]');
+  submitBtn.disabled = true; submitBtn.textContent = 'מפרסם…';
+  try{
+    const data = await apiPost('create', {
+      title: document.getElementById('cTitle').value.trim(),
+      type: document.getElementById('cType').value,
+      description: document.getElementById('cDesc').value.trim()
     });
+    if (!data.ok) throw new Error(data.error);
+    document.getElementById('createOverlay').hidden = true;
+    e.target.reset();
+    showToast('הרעיון פורסם!');
+    await loadProjects();
+  } catch(err){
+    showToast('משהו השתבש, נסו שוב');
+  } finally {
+    submitBtn.disabled = false; submitBtn.textContent = 'פרסום';
   }
+});
 
-  function renderBoard(){
-    const board = document.getElementById('board');
-    board.innerHTML = '';
-    const list = ACTIVE_FILTER === 'all' ? PROJECTS : PROJECTS.filter(p => p.status === ACTIVE_FILTER);
+/* ============ לקיחה / שחרור / עדכון ============ */
+async function claimProject(id){
+  if (!currentUser) return;
+  try{
+    const data = await apiPost('claim', { projectId: id });
+    if (!data.ok) throw new Error(data.error);
+    showToast('הפרויקט אצלכם — בהצלחה בבנייה!');
+    await loadProjects();
+  } catch(err){ showToast('לא ניתן לקחת את הפרויקט כרגע'); }
+}
 
-    if(list.length === 0){
-      board.innerHTML = '<div class="empty">אין פרויקטים להצגה כרגע. אולי הגיע הזמן להציע אחד?</div>';
-      return;
-    }
+async function unclaimProject(id){
+  try{
+    const data = await apiPost('unclaim', { projectId: id });
+    if (!data.ok) throw new Error(data.error);
+    showToast('הפרויקט שוחרר');
+    await loadProjects();
+  } catch(err){ showToast('לא ניתן לשחרר כרגע'); }
+}
 
-    list.forEach(p => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.onclick = () => showDetail(p.id);
-      card.innerHTML =
-        '<div class="card-top">' +
-          '<div class="card-title">' + esc(p.title) + '</div>' +
-          '<div class="badge ' + p.status + '">' + STATUS_LABEL[p.status] + '</div>' +
-        '</div>' +
-        '<div class="card-desc">' + esc(p.description) + '</div>' +
-        '<div class="card-meta">' +
-          '<span class="cat">' + (CATEGORY_LABEL[p.category] || p.category) + '</span>' +
-          '<span>' + fmtDate(p.createdAt) + '</span>' +
-        '</div>';
-      board.appendChild(card);
+function openUpdateModal(p){
+  document.getElementById('uProjectId').value = p.ID;
+  document.getElementById('uStatus').value = p.Status === 'Done' ? 'Done' : 'In Progress';
+  document.getElementById('uNotes').value = p.ProgressNotes || '';
+  document.getElementById('updateOverlay').hidden = false;
+}
+
+document.getElementById('updateForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const submitBtn = e.target.querySelector('button[type=submit]');
+  submitBtn.disabled = true; submitBtn.textContent = 'שומר…';
+  try{
+    const data = await apiPost('updateProgress', {
+      projectId: document.getElementById('uProjectId').value,
+      status: document.getElementById('uStatus').value,
+      notes: document.getElementById('uNotes').value.trim()
     });
+    if (!data.ok) throw new Error(data.error);
+    document.getElementById('updateOverlay').hidden = true;
+    showToast('העדכון נשמר');
+    await loadProjects();
+  } catch(err){
+    showToast('משהו השתבש, נסו שוב');
+  } finally {
+    submitBtn.disabled = false; submitBtn.textContent = 'שמירה';
   }
+});
 
-  function showDetail(id){
-    CURRENT_DETAIL_ID = id;
-    document.getElementById('boardView').classList.add('hidden');
-    document.getElementById('detailView').classList.remove('hidden');
-    renderDetail();
-  }
-
-  function renderDetail(){
-    const p = PROJECTS.find(x => x.id === CURRENT_DETAIL_ID);
-    if(!p) return;
-    const isMine = p.authorEmail === CURRENT_USER.email;
-    const isClaimant = p.claimedByEmail === CURRENT_USER.email;
-
-    let actionsHtml = '';
-    if(p.status === 'open' && !isMine){
-      actionsHtml = '<button class="btn-primary" id="claimBtn">אני לוקח את זה</button>';
-    } else if(p.status === 'open' && isMine){
-      actionsHtml = '<span class="detail-sub">ממתין שמישהו ייקח את הפרויקט</span>';
-    }
-
-    const el = document.getElementById('detailBody');
-    el.innerHTML =
-      '<div class="detail-head">' +
-        '<div>' +
-          '<h2>' + esc(p.title) + '</h2>' +
-          '<div class="detail-sub">' + (CATEGORY_LABEL[p.category] || p.category) + ' · הוצע ב-' + fmtDate(p.createdAt) +
-          (p.claimedByEmail ? ' · נלקח על ידי ' + esc(p.claimedByEmail) : '') + '</div>' +
-        '</div>' +
-        '<div class="badge ' + p.status + '">' + STATUS_LABEL[p.status] + '</div>' +
-      '</div>' +
-      '<div class="detail-desc">' + esc(p.description) + '</div>' +
-      '<div class="detail-actions">' + actionsHtml + '</div>' +
-      '<div id="errBox" class="err"></div>' +
-      '<div class="updates">' +
-        '<h3>עדכוני התקדמות</h3>' +
-        '<div id="updatesList"></div>' +
-        (isClaimant && p.status !== 'done' ? renderUpdateForm() : '') +
-      '</div>';
-
-    const updatesList = document.getElementById('updatesList');
-    if(p.updates.length === 0){
-      updatesList.innerHTML = '<div class="no-updates">אין עדכונים עדיין.</div>';
-    } else {
-      updatesList.innerHTML = p.updates.map(u =>
-        '<div class="update-item"><div class="u-text">' + esc(u.text) + '</div>' +
-        '<div class="u-meta">' + esc(u.authorEmail) + ' · ' + fmtDate(u.createdAt) + '</div></div>'
-      ).join('');
-    }
-
-    const claimBtn = document.getElementById('claimBtn');
-    if(claimBtn){
-      claimBtn.onclick = () => {
-        claimBtn.disabled = true;
-        claimBtn.textContent = 'לוקח...';
-        callServer('claimProject', [SESSION_TOKEN, p.id],
-          () => { loadBoardThenRedetail(); },
-          err => showDetailError(err));
-      };
-    }
-
-    const updSubmit = document.getElementById('updSubmitBtn');
-    if(updSubmit){
-      updSubmit.onclick = () => {
-        const text = document.getElementById('updText').value.trim();
-        if(!text) return;
-        const markDone = document.getElementById('updDone').checked;
-        updSubmit.disabled = true;
-        updSubmit.textContent = 'שולח...';
-        callServer('addUpdate', [SESSION_TOKEN, { projectId: p.id, text: text, markDone: markDone }],
-          () => { loadBoardThenRedetail(); },
-          err => showDetailError(err));
-      };
-    }
-  }
-
-  function renderUpdateForm(){
-    return '<div class="update-form">' +
-      '<label for="updText">עדכון חדש</label>' +
-      '<textarea id="updText" placeholder="מה קרה מאז העדכון האחרון"></textarea>' +
-      '<div class="row">' +
-        '<label style="display:flex;align-items:center;gap:6px;font-weight:400;font-size:13px;color:var(--ink-soft);margin:0;">' +
-          '<input type="checkbox" id="updDone" style="width:auto;"> סמנו כפרויקט הושלם' +
-        '</label>' +
-      '</div>' +
-      '<div style="display:flex;justify-content:flex-end;">' +
-        '<button class="btn-primary" id="updSubmitBtn">פרסום עדכון</button>' +
-      '</div>' +
-    '</div>';
-  }
-
-  function showDetailError(err){
-    if(isAuthExpired(err)){
-      showLoginScreen('פג תוקף ההתחברות, יש להתחבר מחדש.');
-      return;
-    }
-    const box = document.getElementById('errBox');
-    if(box){
-      box.textContent = (err && err.message) ? err.message : String(err);
-      box.style.display = 'block';
-    }
-  }
-
-  function loadBoardThenRedetail(){
-    callServer('getBoard', [SESSION_TOKEN],
-      data => {
-        CURRENT_USER = data.user;
-        PROJECTS = data.projects;
-        renderDetail();
-      },
-      err => {
-        if(isAuthExpired(err)){
-          showLoginScreen('פג תוקף ההתחברות, יש להתחבר מחדש.');
-        } else {
-          onLoadError(err);
-        }
-      });
-  }
-
-  document.getElementById('backBtn').onclick = () => {
-    document.getElementById('detailView').classList.add('hidden');
-    document.getElementById('boardView').classList.remove('hidden');
-    renderBoard();
-  };
-
-  const overlay = document.getElementById('createOverlay');
-  document.getElementById('openCreate').onclick = () => {
-    document.getElementById('f-title').value = '';
-    document.getElementById('f-desc').value = '';
-    document.getElementById('f-cat').value = 'site';
-    document.getElementById('createErr').style.display = 'none';
-    overlay.classList.add('show');
-  };
-  document.getElementById('cancelCreate').onclick = () => overlay.classList.remove('show');
-
-  document.getElementById('submitCreate').onclick = () => {
-    const title = document.getElementById('f-title').value.trim();
-    const desc = document.getElementById('f-desc').value.trim();
-    const cat = document.getElementById('f-cat').value;
-    const errBox = document.getElementById('createErr');
-    if(!title || !desc){
-      errBox.textContent = 'צריך למלא שם ותיאור.';
-      errBox.style.display = 'block';
-      return;
-    }
-    const btn = document.getElementById('submitCreate');
-    btn.disabled = true;
-    btn.textContent = 'מפרסם...';
-    callServer('createProject', [SESSION_TOKEN, { title: title, description: desc, category: cat }],
-      () => {
-        overlay.classList.remove('show');
-        btn.disabled = false;
-        btn.textContent = 'פרסום פרויקט';
-        loadBoard();
-      },
-      err => {
-        if(isAuthExpired(err)){
-          overlay.classList.remove('show');
-          showLoginScreen('פג תוקף ההתחברות, יש להתחבר מחדש.');
-          return;
-        }
-        errBox.textContent = (err && err.message) ? err.message : String(err);
-        errBox.style.display = 'block';
-        btn.disabled = false;
-        btn.textContent = 'פרסום פרויקט';
-      });
-  };
+/* ============ Toast ============ */
+let toastTimer;
+function showToast(msg){
+  clearTimeout(toastTimer);
+  let el = document.querySelector('.toast');
+  if (!el){ el = document.createElement('div'); el.className = 'toast'; document.body.appendChild(el); }
+  el.textContent = msg;
+  toastTimer = setTimeout(() => el.remove(), 3200);
+}
 </script>
 </body>
 </html>
