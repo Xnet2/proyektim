@@ -190,6 +190,10 @@
 </div>
 
 <script>
+  // Captured immediately, before Google Identity Services touches window.google
+  // and potentially clobbers the APPS_SCRIPT_RUN binding Apps Script injects.
+  const APPS_SCRIPT_RUN = google.script.run;
+
   const GOOGLE_CLIENT_ID = '176938351727-t5cgglugm7cgf2j5b2g512jn2ol5agic.apps.googleusercontent.com';
 
   let CURRENT_USER = null;
@@ -276,7 +280,7 @@
     document.getElementById('loginView').classList.add('hidden');
     document.getElementById('loadingState').classList.remove('hidden');
     document.getElementById('loadingState').textContent = 'מתחברים...';
-    google.script.run
+    APPS_SCRIPT_RUN
       .withSuccessHandler(onLoginSuccess)
       .withFailureHandler(err => showLoginScreen(err && err.message ? err.message : String(err)))
       .login(email, name);
@@ -301,7 +305,7 @@
   // ============ BOARD ============
 
   function loadBoard(){
-    google.script.run
+    APPS_SCRIPT_RUN
       .withSuccessHandler(onBoardLoaded)
       .withFailureHandler(onLoadError)
       .getBoard(SESSION_TOKEN);
@@ -424,7 +428,7 @@
       claimBtn.onclick = () => {
         claimBtn.disabled = true;
         claimBtn.textContent = 'לוקח...';
-        google.script.run
+        APPS_SCRIPT_RUN
           .withSuccessHandler(() => { loadBoardThenRedetail(); })
           .withFailureHandler(err => showDetailError(err))
           .claimProject(SESSION_TOKEN, p.id);
@@ -439,7 +443,7 @@
         const markDone = document.getElementById('updDone').checked;
         updSubmit.disabled = true;
         updSubmit.textContent = 'שולח...';
-        google.script.run
+        APPS_SCRIPT_RUN
           .withSuccessHandler(() => { loadBoardThenRedetail(); })
           .withFailureHandler(err => showDetailError(err))
           .addUpdate(SESSION_TOKEN, { projectId: p.id, text: text, markDone: markDone });
@@ -475,7 +479,7 @@
   }
 
   function loadBoardThenRedetail(){
-    google.script.run
+    APPS_SCRIPT_RUN
       .withSuccessHandler(data => {
         CURRENT_USER = data.user;
         PROJECTS = data.projects;
@@ -520,7 +524,7 @@
     const btn = document.getElementById('submitCreate');
     btn.disabled = true;
     btn.textContent = 'מפרסם...';
-    google.script.run
+    APPS_SCRIPT_RUN
       .withSuccessHandler(() => {
         overlay.classList.remove('show');
         btn.disabled = false;
